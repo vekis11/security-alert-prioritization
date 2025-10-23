@@ -120,7 +120,7 @@ jobs:
           echo "4. Enable automated security scanning" >> security-report.md
 
       - name: 📤 Upload Security Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports-${{ github.run_number }}
           path: |
@@ -172,7 +172,7 @@ jobs:
         run: cd client && npm test -- --coverage --watchAll=false || echo "Frontend tests completed"
 
       - name: 📊 Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info,./client/coverage/lcov.info
         continue-on-error: true
@@ -305,13 +305,13 @@ jobs:
           EOF
 
       - name: 📤 Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './deploy'
 
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
       - name: 📊 Deployment Summary
         run: |
@@ -375,7 +375,7 @@ jobs:
           cd client && npm audit --json >> ../audit-report.md || echo "No vulnerabilities found in frontend"
 
       - name: 📤 Upload reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-reports-${{ github.run_number }}
           path: |
