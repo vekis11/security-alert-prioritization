@@ -41,7 +41,7 @@ jobs:
     if: ${{ github.event_name == 'schedule' || github.event.inputs.run_security_scan == 'true' || github.event.inputs.run_security_scan == null }}
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -139,7 +139,7 @@ jobs:
     if: ${{ github.event.inputs.run_tests == 'true' || github.event.inputs.run_tests == null }}
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -188,7 +188,7 @@ jobs:
     environment: production
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -345,7 +345,7 @@ jobs:
     if: github.event_name == 'schedule'
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
