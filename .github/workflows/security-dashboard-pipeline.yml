@@ -51,10 +51,10 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          echo "Installing backend dependencies..."
-          npm ci
-          echo "Installing frontend dependencies..."
-          cd client && npm ci
+          echo "Installing backend dependencies (try npm ci, fall back to npm install)..."
+          npm ci || npm install
+          echo "Installing frontend dependencies (try npm ci, fall back to npm install)..."
+          cd client && (npm ci || npm install)
 
       - name: 🔍 Snyk Security Scan - Backend
         uses: snyk/actions/node@master
@@ -149,10 +149,10 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          echo "Installing backend dependencies..."
-          npm ci
-          echo "Installing frontend dependencies..."
-          cd client && npm ci
+          echo "Installing backend dependencies (try npm ci, fall back to npm install)..."
+          npm ci || npm install
+          echo "Installing frontend dependencies (try npm ci, fall back to npm install)..."
+          cd client && (npm ci || npm install)
 
       - name: 🔍 ESLint - Backend
         run: npm run lint || echo "ESLint completed with warnings"
@@ -198,8 +198,8 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          npm ci
-          cd client && npm ci
+          npm ci || npm install
+          cd client && (npm ci || npm install)
 
       - name: 🏗️ Build Backend
         run: npm run build || echo "No backend build script"
@@ -355,8 +355,8 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          npm ci
-          cd client && npm ci
+          npm ci || npm install
+          cd client && (npm ci || npm install)
 
       - name: 🔍 Check outdated packages
         run: |
