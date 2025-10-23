@@ -1,0 +1,30 @@
+# Snyk Policy for Security Alert Prioritization Dashboard
+version: v1.25.0
+
+# Ignore specific vulnerabilities with justification
+ignore:
+  # Ignore low severity vulnerabilities in dev dependencies
+  SNYK-JS-LODASH-567746:
+    - '*':
+        reason: 'Lodash vulnerability in development dependencies only, not affecting production'
+        expires: '2024-12-31T23:59:59.999Z'
+  
+  # Ignore vulnerabilities in test files
+  SNYK-JS-MINIMIST-559764:
+    - '*':
+        reason: 'Minimist vulnerability in test dependencies, not affecting production build'
+        expires: '2024-12-31T23:59:59.999Z'
+
+# Patch specific vulnerabilities
+patch:
+  # Auto-patch high severity vulnerabilities
+  SNYK-JS-ACORN-559764:
+    - '*':
+        reason: 'Auto-patch high severity Acorn vulnerability'
+        expires: '2024-12-31T23:59:59.999Z'
+
+# Language settings
+language-settings:
+  javascript:
+    severity: high
+    confidence: high

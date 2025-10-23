@@ -1,0 +1,87 @@
+version: 2
+updates:
+  # Backend dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "vekis11"
+    assignees:
+      - "vekis11"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+    groups:
+      development-dependencies:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "jest*"
+          - "husky*"
+          - "lint-staged*"
+      security-dependencies:
+        patterns:
+          - "snyk*"
+          - "helmet*"
+          - "express-rate-limit*"
+
+  # Frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "vekis11"
+    assignees:
+      - "vekis11"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+    groups:
+      react-dependencies:
+        patterns:
+          - "react*"
+          - "@testing-library/*"
+      ui-dependencies:
+        patterns:
+          - "tailwindcss*"
+          - "@tailwindcss/*"
+          - "lucide-react*"
+          - "@heroicons/*"
+      chart-dependencies:
+        patterns:
+          - "chart.js*"
+          - "react-chartjs-2*"
+          - "recharts*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "vekis11"
+    assignees:
+      - "vekis11"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"

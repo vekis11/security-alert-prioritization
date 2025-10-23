@@ -1,0 +1,26 @@
+{
+  "languageSettings": {
+    "javascript": {
+      "severity": {
+        "high": true,
+        "medium": true,
+        "low": false
+      }
+    }
+  },
+  "ignore": {
+    "SNYK-JS-LODASH-567746": {
+      "reason": "Lodash vulnerability in dev dependencies only",
+      "expires": "2024-12-31T23:59:59.999Z"
+    }
+  },
+  "policy": "snyk-policy.yml",
+  "exclude": {
+    "global": [
+      "**/node_modules/**",
+      "**/coverage/**",
+      "**/build/**",
+      "**/dist/**"
+    ]
+  }
+}

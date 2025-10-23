@@ -1,377 +1,315 @@
-# Security Alert Prioritization Dashboard
+# 🔒 Security Alert Prioritization Dashboard
 
-A comprehensive, AI-powered security alert prioritization dashboard that integrates with multiple security tools to provide intelligent threat analysis and automated prioritization.
+[![CI/CD Pipeline](https://github.com/vekis11/security-alert-prioritization/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/vekis11/security-alert-prioritization/actions/workflows/ci-cd.yml)
+[![Security Scan](https://github.com/vekis11/security-alert-prioritization/actions/workflows/security-scan.yml/badge.svg)](https://github.com/vekis11/security-alert-prioritization/actions/workflows/security-scan.yml)
+[![Snyk Security](https://img.shields.io/snyk/vulnerabilities/github/vekis11/security-alert-prioritization)](https://snyk.io/test/github/vekis11/security-alert-prioritization)
+[![GitHub Pages](https://img.shields.io/badge/Deployed%20on-GitHub%20Pages-blue)](https://vekis11.github.io/security-alert-prioritization)
 
-## 🚀 Features
+> **AI-powered security alert and vulnerability prioritization dashboard with comprehensive CI/CD pipeline and automated security scanning**
 
-### Core Capabilities
-- **Real-time Monitoring**: Live data synchronization from 20+ security tools
-- **AI-Powered Analysis**: Intelligent threat prioritization using OpenAI GPT-4
-- **Multi-Tool Integration**: Connect with Tenable, CrowdStrike, Splunk, Veracode, and more
-- **Automated Workflows**: Smart alert assignment and response automation
-- **Advanced Analytics**: Comprehensive reporting and trend analysis
-- **Slack Integration**: Real-time notifications and team collaboration
+## 🚀 **Live Demo**
 
-### Supported Security Tools
+**🌐 [View Live Dashboard](https://vekis11.github.io/security-alert-prioritization)**
 
-#### Vulnerability Management
-- Tenable.io
-- Qualys VMDR
-- Rapid7 InsightVM
-- Vulcan Cyber
-- Kenna Security
+## 📋 **Table of Contents**
 
-#### EDR/XDR Platforms
-- CrowdStrike Falcon
-- SentinelOne
-- Palo Alto Cortex XDR
-- Microsoft Defender for Endpoint
-- VMware Carbon Black
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Security Integrations](#-security-integrations)
+- [CI/CD Pipeline](#-cicd-pipeline)
+- [Quick Start](#-quick-start)
+- [Development](#-development)
+- [Testing](#-testing)
+- [Security Scanning](#-security-scanning)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
 
-#### SIEM/SOAR Platforms
-- Splunk SIEM
-- IBM QRadar
-- Splunk Phantom SOAR
-- FireEye Helix
+## ✨ **Features**
 
-#### Application Security
-- Veracode
-- Checkmarx SAST
+### 🤖 **AI-Powered Analysis**
+- **OpenAI GPT-4 Integration** for intelligent threat analysis
+- **Automated Prioritization** with detailed explanations
+- **Risk Scoring** and business impact assessment
+- **Remediation Planning** with step-by-step guidance
+- **Threat Intelligence** and contextual analysis
 
-#### AI/ML Security
-- Darktrace Enterprise Immune System
+### 🔗 **20+ Security Tool Integrations**
+- **Vulnerability Management**: Tenable, Qualys, Rapid7, Vulcan Cyber, Kenna Security
+- **EDR/XDR Platforms**: CrowdStrike, SentinelOne, Palo Alto, Microsoft Defender, Carbon Black
+- **SIEM/SOAR**: Splunk, IBM QRadar, Splunk Phantom, FireEye Helix
+- **Application Security**: Veracode, Checkmarx
+- **AI/ML Security**: Darktrace Enterprise Immune System
+- **Ticketing/Workflow**: Jira Security, ServiceNow Security Operations
 
-#### Ticketing/Workflow
-- Jira Security
-- ServiceNow Security Operations
+### 📊 **Real-time Dashboard**
+- **Live WebSocket Updates** for real-time monitoring
+- **Interactive Charts** and data visualizations
+- **Responsive Design** for mobile and desktop
+- **Role-based Access Control** with JWT authentication
+- **Customizable Alerts** and notifications
 
-## 🛠 Technology Stack
+### 💬 **Slack Integration**
+- **Real-time Notifications** for critical alerts
+- **Interactive Buttons** for alert management
+- **Daily/Weekly Reports** with security summaries
+- **Slash Commands** for quick status checks
+- **Team Collaboration** features
 
-### Backend
-- **Node.js** with Express.js
-- **MongoDB** for data storage
-- **Socket.io** for real-time communication
-- **OpenAI GPT-4** for AI analysis
-- **JWT** for authentication
-- **Winston** for logging
+## 🏗️ **Architecture**
 
-### Frontend
-- **React 18** with modern hooks
-- **Tailwind CSS** for responsive styling
-- **React Query** for data fetching
-- **Recharts** for data visualization
-- **Socket.io Client** for real-time updates
-- **React Router** for navigation
-- **Mobile-First Design** with responsive breakpoints
-- **Touch-Friendly Interface** optimized for mobile devices
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Frontend │    │  Node.js Backend│    │   MongoDB       │
+│   (Port 3000)   │◄──►│   (Port 5000)   │◄──►│   Database      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   GitHub Pages  │    │   OpenAI API    │    │  Security Tools │
+│   (Deployment)  │    │   (AI Analysis) │    │  (20+ Tools)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
-### Security Features
-- Role-based access control
-- JWT authentication
-- Rate limiting
-- Input validation
-- CORS protection
-- Helmet.js security headers
+## 🔒 **Security Integrations**
 
-## 📦 Installation
+| Category | Tools | Status |
+|----------|-------|--------|
+| **Vulnerability Management** | Tenable, Qualys, Rapid7, Vulcan Cyber, Kenna Security | ✅ Ready |
+| **EDR/XDR** | CrowdStrike, SentinelOne, Palo Alto, Microsoft Defender, Carbon Black | ✅ Ready |
+| **SIEM/SOAR** | Splunk, IBM QRadar, Splunk Phantom, FireEye Helix | ✅ Ready |
+| **Application Security** | Veracode, Checkmarx | ✅ Ready |
+| **AI/ML Security** | Darktrace Enterprise Immune System | ✅ Ready |
+| **Ticketing** | Jira Security, ServiceNow Security Operations | ✅ Ready |
 
-### Prerequisites
-- Node.js 16+ 
-- MongoDB 4.4+
-- npm or yarn
+## 🔄 **CI/CD Pipeline**
 
-### Quick Start
+### **Automated Workflows**
 
-1. **Clone the repository**
+1. **🛡️ Security Scanning**
+   - **Snyk Vulnerability Scanning** (daily)
+   - **OWASP Dependency Check** (on every push)
+   - **CodeQL Security Analysis** (on every PR)
+   - **Automated Security Reports** with recommendations
+
+2. **🧪 Quality Assurance**
+   - **ESLint Code Quality** checks
+   - **Prettier Code Formatting** validation
+   - **Jest Unit Testing** with coverage reports
+   - **Automated Testing** on multiple Node.js versions
+
+3. **🚀 Deployment**
+   - **Automated Build** and testing
+   - **GitHub Pages Deployment** for production
+   - **Artifact Management** with retention policies
+   - **Deployment Notifications** and status updates
+
+### **Pipeline Stages**
+
+```mermaid
+graph LR
+    A[Code Push] --> B[Security Scan]
+    B --> C[Quality Check]
+    C --> D[Build & Test]
+    D --> E[Deploy to GitHub Pages]
+    E --> F[Notify Team]
+```
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 18+
+- MongoDB (local or Atlas)
+- OpenAI API Key
+- Git
+
+### **1. Clone Repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/vekis11/security-alert-prioritization.git
 cd security-alert-prioritization
 ```
 
-2. **Install dependencies**
+### **2. Install Dependencies**
 ```bash
 npm run install-all
 ```
 
-3. **Configure environment variables**
+### **3. Configure Environment**
 ```bash
 cp env.example .env
+# Edit .env with your API keys
 ```
 
-Edit `.env` with your configuration:
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Database
-MONGODB_URI=mongodb://localhost:27017/security-dashboard
-
-# JWT Secret
-JWT_SECRET=your-super-secret-jwt-key-here
-
-# Security Tool API Keys
-TENABLE_API_KEY=your-tenable-api-key
-TENABLE_ACCESS_KEY=your-tenable-access-key
-TENABLE_SECRET_KEY=your-tenable-secret-key
-
-CROWDSTRIKE_CLIENT_ID=your-crowdstrike-client-id
-CROWDSTRIKE_CLIENT_SECRET=your-crowdstrike-client-secret
-
-VERACODE_API_ID=your-veracode-api-id
-VERACODE_API_KEY=your-veracode-api-key
-
-SPLUNK_HOST=your-splunk-host
-SPLUNK_TOKEN=your-splunk-token
-
-# AI Configuration
-OPENAI_API_KEY=your-openai-api-key
-
-# Slack Integration
-SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
-SLACK_SIGNING_SECRET=your-slack-signing-secret
-SLACK_WEBHOOK_URL=your-slack-webhook-url
-```
-
-4. **Start the application**
+### **4. Start Development**
 ```bash
 npm run dev
 ```
 
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+### **5. Access Dashboard**
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:5000
 
-## 🔧 Configuration
+## 🛠️ **Development**
 
-### Adding New Security Tool Integrations
+### **Available Scripts**
 
-1. **Create Service Class**
-```javascript
-// server/services/NewToolService.js
-class NewToolService {
-  constructor(config) {
-    this.apiKey = config.api_key;
-    this.baseUrl = config.base_url;
-  }
+```bash
+# Development
+npm run dev              # Start both frontend and backend
+npm run server           # Start backend only
+npm run client           # Start frontend only
 
-  async authenticate() {
-    // Implementation
-  }
+# Testing
+npm test                 # Run all tests
+npm run test:coverage    # Run tests with coverage
+npm run test:watch       # Run tests in watch mode
 
-  async getAlerts(filters = {}) {
-    // Implementation
-  }
+# Code Quality
+npm run lint             # Run ESLint
+npm run lint:fix         # Fix ESLint issues
+npm run format           # Format code with Prettier
+npm run format:check     # Check code formatting
 
-  transformAlerts(alerts) {
-    // Transform to standard format
-  }
-}
+# Security
+npm run security:audit   # Run npm audit
+npm run security:fix     # Fix security vulnerabilities
+npm run security:snyk   # Run Snyk security scan
+
+# Dependencies
+npm run deps:check       # Check for outdated packages
+npm run deps:update   # Update packages
 ```
 
-2. **Update Integration Types**
-Add to `server/routes/integrations.js`:
-```javascript
-{
-  id: 'new_tool',
-  name: 'New Security Tool',
-  description: 'Description of the tool',
-  icon: 'shield',
-  category: 'Vulnerability Management',
-  fields: [
-    { name: 'api_key', label: 'API Key', type: 'password', required: true },
-    { name: 'base_url', label: 'Base URL', type: 'text', required: true }
-  ]
-}
+### **Project Structure**
+```
+security-alert-prioritization/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/     # Reusable components
+│   │   ├── pages/         # Page components
+│   │   ├── contexts/      # React contexts
+│   │   └── __tests__/     # Frontend tests
+├── server/                 # Node.js backend
+│   ├── routes/            # API routes
+│   ├── services/          # Business logic
+│   ├── models/            # Database models
+│   └── __tests__/         # Backend tests
+├── .github/workflows/      # CI/CD workflows
+├── docs/                   # Documentation
+└── tests/                  # Integration tests
 ```
 
-3. **Update Data Sync Service**
-Add case to `server/services/DataSyncService.js`:
-```javascript
-case 'new_tool':
-  service = new NewToolService(integration.configuration.new_tool);
-  alerts = await service.getAlerts(integration.settings.filters);
-  break;
+## 🧪 **Testing**
+
+### **Test Coverage**
+- **Unit Tests**: Jest for backend and frontend
+- **Integration Tests**: API endpoint testing
+- **Security Tests**: Vulnerability scanning
+- **Performance Tests**: Load testing
+
+### **Running Tests**
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test suites
+npm run test:backend
+npm run test:frontend
 ```
 
-### AI Configuration
+## 🔒 **Security Scanning**
 
-The system uses OpenAI GPT-4 for intelligent analysis. Configure your OpenAI API key in the environment variables:
+### **Automated Security Checks**
+- **Snyk**: Daily vulnerability scanning
+- **OWASP**: Dependency vulnerability analysis
+- **CodeQL**: Static code analysis
+- **npm audit**: Package vulnerability checks
 
+### **Security Reports**
+- **Daily Security Reports** via GitHub Actions
+- **Vulnerability Notifications** via Slack
+- **Security Metrics** and trend analysis
+- **Compliance Reporting** for audit requirements
+
+## 🚀 **Deployment**
+
+### **GitHub Pages Deployment**
+The application is automatically deployed to GitHub Pages on every push to the main branch.
+
+**Live URL**: https://vekis11.github.io/security-alert-prioritization
+
+### **Deployment Process**
+1. **Code Push** to main branch
+2. **Automated Testing** and security scanning
+3. **Build Process** for production
+4. **GitHub Pages Deployment**
+5. **Health Check** and monitoring
+
+### **Environment Configuration**
 ```env
+# Production Environment Variables
+NODE_ENV=production
+MONGODB_URI=your-production-mongodb-uri
 OPENAI_API_KEY=your-openai-api-key
+JWT_SECRET=your-production-jwt-secret
 ```
 
-### Slack Integration
+## 📊 **Monitoring & Analytics**
 
-1. **Create Slack App**
-   - Go to https://api.slack.com/apps
-   - Create a new app
-   - Enable OAuth & Permissions
-   - Add Bot Token Scopes: `chat:write`, `channels:read`, `users:read`
+### **Health Monitoring**
+- **API Health Checks** every 5 minutes
+- **Database Connection** monitoring
+- **Service Status** tracking
+- **Performance Metrics** collection
 
-2. **Configure Environment Variables**
-```env
-SLACK_BOT_TOKEN=xoxb-your-bot-token
-SLACK_SIGNING_SECRET=your-signing-secret
-SLACK_WEBHOOK_URL=your-webhook-url
-```
+### **Security Metrics**
+- **Vulnerability Trends** over time
+- **Security Tool Integration** status
+- **Alert Processing** statistics
+- **AI Analysis** performance metrics
 
-## 📊 API Documentation
+## 🤝 **Contributing**
 
-### Authentication
-```bash
-POST /api/auth/login
-{
-  "username": "user@example.com",
-  "password": "password"
-}
-```
+### **Development Workflow**
+1. **Fork** the repository
+2. **Create** a feature branch
+3. **Make** your changes
+4. **Run** tests and security scans
+5. **Submit** a pull request
 
-### Alerts
-```bash
-GET /api/alerts?severity=critical&status=open&limit=25
-POST /api/alerts/:id/assign
-PUT /api/alerts/:id/resolve
-```
+### **Code Standards**
+- **ESLint** for code quality
+- **Prettier** for code formatting
+- **Jest** for testing
+- **Conventional Commits** for commit messages
 
-### Integrations
-```bash
-GET /api/integrations
-POST /api/integrations
-POST /api/integrations/:id/test
-POST /api/integrations/:id/sync
-```
+### **Security Guidelines**
+- **Never commit** API keys or secrets
+- **Use** environment variables for configuration
+- **Follow** security best practices
+- **Report** security vulnerabilities responsibly
 
-### AI Analysis
-```bash
-POST /api/ai/analyze
-POST /api/ai/prioritize
-GET /api/ai/insights
-```
+## 📄 **License**
 
-## 🎯 Usage
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Responsive Design
-- **Mobile-First**: Optimized for smartphones and tablets
-- **Desktop**: Full-featured experience on large screens
-- **Touch-Friendly**: 44px minimum touch targets for mobile
-- **Adaptive Layout**: Content reflows based on screen size
-- **Progressive Enhancement**: Core functionality on all devices
+## 🆘 **Support**
 
-### Dashboard Overview
-- **Real-time Stats**: Critical, high, medium, and low priority alerts
-- **Charts**: Severity distribution and status overview
-- **Recent Alerts**: Latest security alerts with AI analysis
-- **AI Insights**: Intelligent recommendations and threat analysis
+- **Documentation**: [Wiki](https://github.com/vekis11/security-alert-prioritization/wiki)
+- **Issues**: [GitHub Issues](https://github.com/vekis11/security-alert-prioritization/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/vekis11/security-alert-prioritization/discussions)
+- **Security**: [Security Policy](https://github.com/vekis11/security-alert-prioritization/security/policy)
 
-### Alert Management
-- **Filtering**: By severity, status, source, category, priority
-- **Search**: Full-text search across alerts
-- **Bulk Actions**: Mass update, assign, resolve
-- **AI Analysis**: Risk score, business impact, urgency reason
+## 🏆 **Acknowledgments**
 
-### Integration Management
-- **Connect Tools**: Easy setup for 20+ security tools
-- **Test Connections**: Verify API credentials
-- **Sync Data**: Manual and automated data synchronization
-- **Monitor Status**: Real-time integration health
-
-### AI-Powered Features
-- **Smart Prioritization**: Automatically rank alerts by risk
-- **Threat Intelligence**: Contextual threat analysis
-- **Remediation Plans**: AI-generated response strategies
-- **Risk Assessment**: Comprehensive business impact analysis
-
-## 🔒 Security Considerations
-
-### Authentication & Authorization
-- JWT-based authentication
-- Role-based access control (Admin, Analyst, Engineer, Viewer)
-- Password hashing with bcrypt
-- Session management
-
-### Data Protection
-- Input validation and sanitization
-- SQL injection prevention
-- XSS protection
-- CORS configuration
-- Rate limiting
-
-### API Security
-- API key management
-- Request validation
-- Error handling
-- Logging and monitoring
-
-## 🚀 Deployment
-
-### Docker Deployment
-```bash
-# Build images
-docker build -t security-dashboard-backend ./server
-docker build -t security-dashboard-frontend ./client
-
-# Run with docker-compose
-docker-compose up -d
-```
-
-### Production Environment
-1. Set `NODE_ENV=production`
-2. Configure production MongoDB
-3. Set up SSL certificates
-4. Configure reverse proxy (nginx)
-5. Set up monitoring and logging
-
-## 📈 Performance Optimization
-
-### Backend
-- Database indexing
-- Query optimization
-- Caching strategies
-- Rate limiting
-- Connection pooling
-
-### Frontend
-- Code splitting
-- Lazy loading
-- Image optimization
-- Bundle analysis
-- CDN integration
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the documentation
-- Contact the development team
-
-## 🔮 Roadmap
-
-### Upcoming Features
-- [ ] Advanced threat hunting capabilities
-- [ ] Machine learning model training
-- [ ] Custom dashboard widgets
-- [ ] Mobile application
-- [ ] Advanced reporting
-- [ ] Workflow automation
-- [ ] Third-party integrations
-- [ ] API rate limiting
-- [ ] Advanced analytics
-- [ ] Compliance reporting
+- **OpenAI** for AI-powered threat analysis
+- **Snyk** for vulnerability scanning
+- **GitHub** for CI/CD and hosting
+- **Security Community** for best practices and feedback
 
 ---
 
-**Built with ❤️ for the security community**
+**🔒 Built with security in mind. Deployed with confidence.**

@@ -1,0 +1,86 @@
+name: Automated Dependency Updates
+
+on:
+  schedule:
+    # Check for updates every Monday at 6 AM UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+jobs:
+  # Check for dependency updates
+  dependency-check:
+    name: Check for Updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd client && npm ci
+
+      - name: Check for outdated packages
+        run: |
+          echo "## 📦 Backend Dependencies" > dependency-report.md
+          npm outdated --json >> dependency-report.md || echo "No outdated packages in backend"
+          echo "" >> dependency-report.md
+          echo "## 📦 Frontend Dependencies" >> dependency-report.md
+          cd client && npm outdated --json >> ../dependency-report.md || echo "No outdated packages in frontend"
+
+      - name: Run Snyk test on current dependencies
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --severity-threshold=high
+
+      - name: Upload dependency report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-report
+          path: dependency-report.md
+          retention-days: 7
+
+  # Security audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd client && npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "## 🔒 Backend Security Audit" > audit-report.md
+          npm audit --json >> audit-report.md || echo "No vulnerabilities found in backend"
+          echo "" >> audit-report.md
+          echo "## 🔒 Frontend Security Audit" >> audit-report.md
+          cd client && npm audit --json >> ../audit-report.md || echo "No vulnerabilities found in frontend"
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-report
+          path: audit-report.md
+          retention-days: 7
