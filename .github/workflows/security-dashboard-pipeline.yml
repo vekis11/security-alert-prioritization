@@ -61,18 +61,34 @@ jobs:
         continue-on-error: true
         with:
           args: --severity-threshold=high --file=package.json --json-file-output=snyk-backend.json
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: 🔍 Snyk Security Scan - Frontend
         uses: snyk/actions/node@master
         continue-on-error: true
         with:
           args: --severity-threshold=high --file=client/package.json --json-file-output=snyk-frontend.json
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: 📊 Snyk Monitor
         uses: snyk/actions/node@master
         continue-on-error: true
         with:
           args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: 🔧 Snyk Auth Check
+        run: |
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "⚠️ SNYK_TOKEN not set - Snyk scans will be skipped"
+            echo "To enable Snyk scanning, add SNYK_TOKEN to repository secrets"
+            echo "Get your token from: https://snyk.io/account"
+          else
+            echo "✅ SNYK_TOKEN is configured"
+          fi
 
       - name: 🛡️ OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
