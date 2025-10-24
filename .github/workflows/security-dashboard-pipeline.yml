@@ -188,7 +188,7 @@ jobs:
         run: cd client && npm test -- --coverage --watchAll=false || echo "Frontend tests completed"
 
       - name: 📊 Upload Coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage/lcov.info,./client/coverage/lcov.info
         continue-on-error: true
