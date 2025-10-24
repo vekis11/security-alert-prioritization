@@ -44,7 +44,7 @@
     "axios": "^1.6.2",
     "socket.io": "^4.7.4",
     "node-cron": "^3.0.3",
-    "openai": "^4.20.1",
+    "openai": "^6.7.0",
     "@slack/web-api": "^6.9.0",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
