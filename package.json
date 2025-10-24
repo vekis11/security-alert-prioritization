@@ -45,7 +45,7 @@
     "socket.io": "^4.7.4",
     "node-cron": "^3.0.3",
     "openai": "^4.20.1",
-    "@slack/web-api": "^6.9.0",
+    "@slack/web-api": "^7.11.0",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "mongoose": "^8.0.3",
