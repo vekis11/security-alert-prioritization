@@ -133,6 +133,9 @@ jobs:
             echo "❌ OWASP scan failed" >> security-report.md
           fi
           echo "" >> security-report.md
+          echo "### Trivy (IaC & Secrets)" >> security-report.md
+          echo "ℹ️ IaC and secrets scanning runs in the separate Trivy workflow (see Actions)." >> security-report.md
+          echo "" >> security-report.md
           echo "## 🛡️ Security Recommendations" >> security-report.md
           echo "1. Review and address any high-severity vulnerabilities" >> security-report.md
           echo "2. Update dependencies regularly" >> security-report.md
