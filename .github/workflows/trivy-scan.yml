@@ -1,7 +1,7 @@
-# Reusable Trivy workflow: IaC misconfigs (Terraform, Kubernetes) + secrets in code
-# Uses aquasecurity/trivy-action - see https://github.com/aquasecurity/trivy-action
+# Trivy: Config-based scan, IaC, Git repo, rootfs, SBOM, ECR, templates, Code Scanning, JSON export
+# https://github.com/aquasecurity/trivy-action
 
-name: Trivy - IaC & Secrets Scan
+name: Trivy - Full Scan (Config, IaC, Repo, Rootfs, SBOM, ECR)
 
 on:
   push:
@@ -9,48 +9,46 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 3 * * *'   # Daily at 3 AM UTC
+    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
-      scan_iac:
-        description: 'Run IaC (Terraform/Kubernetes) misconfig scan'
-        required: false
-        default: true
-        type: boolean
-      scan_secrets:
-        description: 'Run secrets-in-code scan'
-        required: false
-        default: true
-        type: boolean
       scan_ref:
-        description: 'Path to scan (default: repo root)'
+        description: 'Path to scan (default: .)'
         required: false
         default: '.'
         type: string
+      rootfs_path:
+        description: 'Path for rootfs scan (empty = skip)'
+        required: false
+        default: ''
+        type: string
+      ecr_image_ref:
+        description: 'AWS ECR image to scan (empty = skip). e.g. 123456789.dkr.ecr.region.amazonaws.com/repo:tag'
+        required: false
+        default: ''
+        type: string
   workflow_call:
     inputs:
-      scan_iac:
-        description: 'Run IaC misconfig scan'
-        required: false
-        default: true
-        type: boolean
-      scan_secrets:
-        description: 'Run secrets-in-code scan'
-        required: false
-        default: true
-        type: boolean
       scan_ref:
-        description: 'Path to scan'
         required: false
         default: '.'
+        type: string
+      rootfs_path:
+        required: false
+        default: ''
+        type: string
+      ecr_image_ref:
+        required: false
+        default: ''
         type: string
 
 env:
   TRIVY_VERSION: 'v0.68.1'
+  SCAN_REF: ${{ inputs.scan_ref || github.event.inputs.scan_ref || '.' }}
 
 jobs:
-  trivy-scan:
-    name: Trivy IaC & Secrets
+  trivy-full-scan:
+    name: Trivy Full Scan
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -59,45 +57,199 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy IaC (config) scanner
-        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call' || github.event.inputs.scan_iac == true }}
+      # --- Scan CI Pipeline (w/ Trivy Config) ---
+      - name: Trivy scan (fs) with Trivy Config
+        id: trivy-config
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: ${{ env.SCAN_REF }}
+          trivy-config: config/trivy/trivy.yaml
+          output: 'trivy-config-results.sarif'
+          exit-code: '0'
+        continue-on-error: true
+
+      # --- Infrastructure as Code ---
+      - name: Trivy IaC (config) scan
         id: trivy-iac
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'config'
-          scan-ref: ${{ inputs.scan_ref || github.event.inputs.scan_ref || '.' }}
+          scan-ref: ${{ env.SCAN_REF }}
           format: 'sarif'
           output: 'trivy-iac-results.sarif'
           exit-code: '0'
           severity: 'CRITICAL,HIGH,MEDIUM'
           hide-progress: true
+          skip-setup-trivy: true
         continue-on-error: true
 
-      - name: Run Trivy filesystem scanner (secrets + misconfig)
-        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'workflow_call' || github.event.inputs.scan_secrets == true }}
+      - name: Trivy IaC scan (JSON export)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'config'
+          scan-ref: ${{ env.SCAN_REF }}
+          format: 'json'
+          output: 'trivy-iac-results.json'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      # --- Git repo / filesystem (vuln, secret, misconfig) ---
+      - name: Trivy Git repo / filesystem scan
         id: trivy-fs
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
-          scan-ref: ${{ inputs.scan_ref || github.event.inputs.scan_ref || '.' }}
+          scan-ref: ${{ env.SCAN_REF }}
           format: 'sarif'
-          output: 'trivy-secrets-results.sarif'
+          output: 'trivy-fs-results.sarif'
           exit-code: '0'
           severity: 'CRITICAL,HIGH,MEDIUM'
-          scanners: 'secret,misconfig'
+          scanners: 'vuln,secret,misconfig'
           hide-progress: true
-          skip-setup-trivy: ${{ steps.trivy-iac.outcome == 'success' }}
+          skip-setup-trivy: true
         continue-on-error: true
 
-      - name: Ensure SARIF files exist (for upload when Trivy writes no file)
+      - name: Trivy filesystem scan (JSON export)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: ${{ env.SCAN_REF }}
+          format: 'json'
+          output: 'trivy-fs-results.json'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          scanners: 'vuln,secret,misconfig'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      # --- Rootfs (optional) ---
+      - name: Trivy rootfs scan
+        if: ${{ (inputs.rootfs_path != '' || github.event.inputs.rootfs_path != '') && env.SCAN_REF != '' }}
+        id: trivy-rootfs
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'rootfs'
+          scan-ref: ${{ inputs.rootfs_path || github.event.inputs.rootfs_path || env.SCAN_REF }}
+          format: 'sarif'
+          output: 'trivy-rootfs-results.sarif'
+          exit-code: '0'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      - name: Trivy rootfs scan (JSON export)
+        if: ${{ (inputs.rootfs_path != '' || github.event.inputs.rootfs_path != '') && env.SCAN_REF != '' }}
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'rootfs'
+          scan-ref: ${{ inputs.rootfs_path || github.event.inputs.rootfs_path || env.SCAN_REF }}
+          format: 'json'
+          output: 'trivy-rootfs-results.json'
+          exit-code: '0'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      # --- SBOM ---
+      - name: Trivy generate SBOM
+        id: trivy-sbom
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: ${{ env.SCAN_REF }}
+          format: 'cyclonedx'
+          output: 'trivy-sbom.json'
+          exit-code: '0'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      # --- AWS ECR (optional) ---
+      - name: Trivy scan AWS ECR image
+        if: ${{ inputs.ecr_image_ref != '' || github.event.inputs.ecr_image_ref != '' }}
+        id: trivy-ecr
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'image'
+          image-ref: ${{ inputs.ecr_image_ref || github.event.inputs.ecr_image_ref }}
+          format: 'sarif'
+          output: 'trivy-ecr-results.sarif'
+          exit-code: '0'
+          hide-progress: true
+          skip-setup-trivy: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION || 'us-east-1' }}
+        continue-on-error: true
+
+      - name: Trivy ECR scan (JSON export)
+        if: ${{ inputs.ecr_image_ref != '' || github.event.inputs.ecr_image_ref != '' }}
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'image'
+          image-ref: ${{ inputs.ecr_image_ref || github.event.inputs.ecr_image_ref }}
+          format: 'json'
+          output: 'trivy-ecr-results.json'
+          exit-code: '0'
+          hide-progress: true
+          skip-setup-trivy: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION || 'us-east-1' }}
+        continue-on-error: true
+
+      # --- Using Trivy with templates (HTML report) ---
+      - name: Trivy HTML report (template)
+        id: trivy-html
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: ${{ env.SCAN_REF }}
+          format: 'template'
+          template: '@$HOME/.local/bin/trivy-bin/contrib/html.tpl'
+          output: 'trivy-report.html'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          scanners: 'vuln,secret,misconfig'
+          hide-progress: true
+          skip-setup-trivy: true
+        continue-on-error: true
+
+      # --- Ensure files exist for artifact upload ---
+      - name: Ensure result files exist
         if: always()
         run: |
-          # Minimal valid SARIF when no findings - so artifact and Security tab always get a file
           EMPTY_SARIF='{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"trivy","version":"0.0","rules":[]}},"results":[]}]}'
+          EMPTY_JSON='{"Results":null,"ArtifactName":"","SchemaVersion":0}'
+          [ -f "trivy-config-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-config-results.sarif
           [ -f "trivy-iac-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-iac-results.sarif
-          [ -f "trivy-secrets-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-secrets-results.sarif
+          [ -f "trivy-iac-results.json" ] || echo "$EMPTY_JSON" > trivy-iac-results.json
+          [ -f "trivy-fs-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-fs-results.sarif
+          [ -f "trivy-fs-results.json" ] || echo "$EMPTY_JSON" > trivy-fs-results.json
+          [ -f "trivy-sbom.json" ] || echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1,"components":[]}' > trivy-sbom.json
+          [ -f "trivy-report.html" ] || echo '<!DOCTYPE html><html><body><p>No Trivy HTML report generated.</p></body></html>' > trivy-report.html
+          [ -f "trivy-rootfs-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-rootfs-results.sarif
+          [ -f "trivy-rootfs-results.json" ] || echo "$EMPTY_JSON" > trivy-rootfs-results.json
+          [ -f "trivy-ecr-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-ecr-results.sarif
+          [ -f "trivy-ecr-results.json" ] || echo "$EMPTY_JSON" > trivy-ecr-results.json
 
-      - name: Upload Trivy IaC SARIF to GitHub Security
+      # --- GitHub Code Scanning (upload SARIF) ---
+      - name: Upload Trivy Config SARIF
+        if: always() && (steps.trivy-config.outcome == 'success' || steps.trivy-config.outcome == 'failure')
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
+        continue-on-error: true
+
+      - name: Upload Trivy IaC SARIF
         if: always() && (steps.trivy-iac.outcome == 'success' || steps.trivy-iac.outcome == 'failure')
         uses: github/codeql-action/upload-sarif@v4
         with:
@@ -105,67 +257,67 @@ jobs:
           category: 'trivy-iac'
         continue-on-error: true
 
-      - name: Upload Trivy Secrets SARIF to GitHub Security
+      - name: Upload Trivy FS SARIF
         if: always() && (steps.trivy-fs.outcome == 'success' || steps.trivy-fs.outcome == 'failure')
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: 'trivy-secrets-results.sarif'
-          category: 'trivy-secrets'
+          sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-fs'
         continue-on-error: true
 
-      - name: Publish Trivy summary (no Code Scanning)
+      - name: Upload Trivy Rootfs SARIF
+        if: always() && (steps.trivy-rootfs.outcome == 'success' || steps.trivy-rootfs.outcome == 'failure')
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-rootfs-results.sarif'
+          category: 'trivy-rootfs'
+        continue-on-error: true
+
+      - name: Upload Trivy ECR SARIF
+        if: always() && (steps.trivy-ecr.outcome == 'success' || steps.trivy-ecr.outcome == 'failure')
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-ecr-results.sarif'
+          category: 'trivy-ecr'
+        continue-on-error: true
+
+      # --- Modern view: Step summary ---
+      - name: Trivy summary (modern view)
         if: always()
         run: |
-          echo "### Trivy Scan Summary" >> $GITHUB_STEP_SUMMARY
-          if [ -f "trivy-iac-results.sarif" ]; then
-            echo "#### IaC (Terraform/Kubernetes)" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Click to expand</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "## Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan | SARIF | JSON |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Config (Trivy Config) | trivy-config-results.sarif | - |" >> $GITHUB_STEP_SUMMARY
+          echo "| IaC (Terraform/K8s) | trivy-iac-results.sarif | trivy-iac-results.json |" >> $GITHUB_STEP_SUMMARY
+          echo "| Git repo / FS | trivy-fs-results.sarif | trivy-fs-results.json |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM | - | trivy-sbom.json |" >> $GITHUB_STEP_SUMMARY
+          echo "| HTML report | - | trivy-report.html |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the **trivy-reports** artifact for all SARIF, JSON, and HTML files. Results are also in the [Security tab](https://github.com/${{ github.repository }}/security/code-scanning)." >> $GITHUB_STEP_SUMMARY
+          if [ -f "trivy-report.html" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            head -100 trivy-iac-results.sarif >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -f "trivy-secrets-results.sarif" ]; then
-            echo "#### Secrets & Misconfig" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Click to expand</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            head -100 trivy-secrets-results.sarif >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
+            echo "### HTML report" >> $GITHUB_STEP_SUMMARY
+            echo "Open \`trivy-report.html\` from the artifact for a full report." >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Upload Trivy reports as artifacts
+      # --- Upload artifacts (SARIF + JSON + HTML) ---
+      - name: Upload Trivy reports (SARIF, JSON, HTML)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-reports-${{ github.run_number }}
           path: |
+            trivy-config-results.sarif
             trivy-iac-results.sarif
-            trivy-secrets-results.sarif
+            trivy-iac-results.json
+            trivy-fs-results.sarif
+            trivy-fs-results.json
+            trivy-sbom.json
+            trivy-report.html
+            trivy-rootfs-results.sarif
+            trivy-rootfs-results.json
+            trivy-ecr-results.sarif
+            trivy-ecr-results.json
           retention-days: 30
-
-  # Optional: fail the workflow on CRITICAL/HIGH (uncomment to enforce)
-  # trivy-fail-on-severity:
-  #   name: Trivy - Fail on High/Critical
-  #   runs-on: ubuntu-24.04
-  #   needs: trivy-scan
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: aquasecurity/trivy-action@0.33.1
-  #       with:
-  #         scan-type: 'config'
-  #         scan-ref: '.'
-  #         format: 'table'
-  #         exit-code: '1'
-  #         severity: 'CRITICAL,HIGH'
-  #     - uses: aquasecurity/trivy-action@0.33.1
-  #       with:
-  #         scan-type: 'fs'
-  #         scan-ref: '.'
-  #         scanners: 'secret,misconfig'
-  #         format: 'table'
-  #         exit-code: '1'
-  #         severity: 'CRITICAL,HIGH'
-  #         skip-setup-trivy: true

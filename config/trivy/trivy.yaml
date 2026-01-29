@@ -1,10 +1,10 @@
-# Optional Trivy config for IaC + secrets scanning
-# Use with: trivy-config: config/trivy/trivy.yaml in the workflow
-# See https://aquasecurity.github.io/trivy/latest/docs/configuration/ for full options
+# Trivy config for CI pipeline (Scan CI Pipeline w/ Trivy Config)
+# Use with: trivy-config: config/trivy/trivy.yaml
+# See https://aquasecurity.github.io/trivy/latest/docs/configuration/
 
 format: sarif
 exit-code: 0
 severity: CRITICAL,HIGH,MEDIUM
-# Secret scanner config (optional - paths/patterns to include or exclude)
+# Optional: secret-specific config
 # secret:
 #   config: config/trivy/secret.yaml

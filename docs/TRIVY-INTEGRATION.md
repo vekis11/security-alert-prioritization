@@ -1,14 +1,20 @@
-# Trivy Integration – IaC Misconfigs & Secrets
+# Trivy Integration – Full Scan (Config, IaC, Repo, Rootfs, SBOM, ECR)
 
-This guide explains how Trivy is integrated for **Infrastructure as Code (Terraform, Kubernetes)** misconfigurations and **secrets in code**, and how to reuse or automate it.
+This guide explains how Trivy is integrated and how to reuse or automate it.
 
 ## What’s in place
 
 - **Workflow**: `.github/workflows/trivy-scan.yml`
 - **Scans**:
-  1. **IaC (config)** – Terraform, Kubernetes, CloudFormation, etc.
-  2. **Secrets & misconfig (fs)** – hardcoded secrets and filesystem misconfigurations
-- **Output**: SARIF uploaded to GitHub Security (Code Scanning) and artifacts for the run.
+  1. **Scan CI Pipeline (w/ Trivy Config)** – fs scan using `config/trivy/trivy.yaml`
+  2. **Infrastructure as Code** – Terraform, Kubernetes, CloudFormation (config scan)
+  3. **Git repo / filesystem** – vuln, secret, misconfig (fs scan)
+  4. **Rootfs** (optional) – rootfs scan when `rootfs_path` is provided
+  5. **SBOM** – CycloneDX SBOM generation
+  6. **AWS ECR** (optional) – image scan when `ecr_image_ref` and AWS secrets are set
+- **Templates**: HTML report via default Trivy template (`html.tpl`)
+- **GitHub Code Scanning**: All SARIF files uploaded to the Security tab
+- **Output**: SARIF + JSON for each scan, HTML report, and SBOM; all in the **trivy-reports** artifact
 
 ---
 
@@ -21,7 +27,8 @@ The workflow is under `.github/workflows/trivy-scan.yml`. It runs on:
 - **Push** to `main` and `develop`
 - **Pull requests** to `main`
 - **Schedule**: daily at 3 AM UTC
-- **Manual**: Actions → “Trivy - IaC & Secrets Scan” → “Run workflow”
+- **Manual**: Actions → “Trivy - Full Scan (Config, IaC, Repo, Rootfs, SBOM, ECR)” → “Run workflow”
+  - Optional inputs: `scan_ref`, `rootfs_path`, `ecr_image_ref`
 
 No extra setup is required for basic use.
 
@@ -42,9 +49,12 @@ If the repo uses default GHA permissions, this is enough. For restricted permiss
 
 ### 3. View results
 
-- **Security tab**: **Security** → **Code scanning** → open alerts from “trivy-iac” and “trivy-secrets”.
-- **Run artifacts**: In the run summary, download **trivy-reports-&lt;run_number&gt;** (contains `trivy-iac-results.sarif` and `trivy-secrets-results.sarif`).
-- **Summary**: Expand “Trivy Scan Summary” in the job output.
+- **Security tab**: **Security** → **Code scanning** → open alerts from categories: trivy-config, trivy-iac, trivy-fs, trivy-rootfs, trivy-ecr.
+- **Run artifacts**: Download **trivy-reports-&lt;run_number&gt;** for:
+  - SARIF: `trivy-config-results.sarif`, `trivy-iac-results.sarif`, `trivy-fs-results.sarif`, `trivy-rootfs-results.sarif`, `trivy-ecr-results.sarif`
+  - JSON: `trivy-iac-results.json`, `trivy-fs-results.json`, `trivy-rootfs-results.json`, `trivy-ecr-results.json`, `trivy-sbom.json`
+  - HTML: `trivy-report.html` (open in browser for a modern report)
+- **Summary**: Job step summary shows a table and a link to the Security tab and artifact.
 
 ### 4. Optional: use a Trivy config file
 
@@ -71,6 +81,17 @@ If Trivy needs to pull private IaC modules, configure Git auth before the scan (
 ```
 
 Add `PRIVATE_REPO_TOKEN` (e.g. a PAT with `repo` scope) to the repo secrets.
+
+### 6. Optional: AWS ECR scan
+
+To scan an image in AWS ECR:
+
+1. Add repository secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` (or rely on default `us-east-1`).
+2. Run the workflow manually and set **ecr_image_ref** to your ECR image URI, e.g. `123456789.dkr.ecr.us-east-1.amazonaws.com/my-repo:tag`.
+
+### 7. Optional: Rootfs scan
+
+To scan a rootfs directory, run the workflow manually and set **rootfs_path** to the path of the rootfs (e.g. a directory or extracted rootfs).
 
 ---
 
