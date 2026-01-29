@@ -89,6 +89,14 @@ jobs:
           skip-setup-trivy: ${{ steps.trivy-iac.outcome == 'success' }}
         continue-on-error: true
 
+      - name: Ensure SARIF files exist (for upload when Trivy writes no file)
+        if: always()
+        run: |
+          # Minimal valid SARIF when no findings - so artifact and Security tab always get a file
+          EMPTY_SARIF='{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"trivy","version":"0.0","rules":[]}},"results":[]}]}'
+          [ -f "trivy-iac-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-iac-results.sarif
+          [ -f "trivy-secrets-results.sarif" ] || echo "$EMPTY_SARIF" > trivy-secrets-results.sarif
+
       - name: Upload Trivy IaC SARIF to GitHub Security
         if: always() && (steps.trivy-iac.outcome == 'success' || steps.trivy-iac.outcome == 'failure')
         uses: github/codeql-action/upload-sarif@v4
@@ -137,7 +145,6 @@ jobs:
             trivy-iac-results.sarif
             trivy-secrets-results.sarif
           retention-days: 30
-          if-no-files-found: ignore
 
   # Optional: fail the workflow on CRITICAL/HIGH (uncomment to enforce)
   # trivy-fail-on-severity:
