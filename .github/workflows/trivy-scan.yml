@@ -4,12 +4,6 @@
 name: Trivy - Full Scan (Config, IaC, Repo, Rootfs, SBOM, ECR)
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       scan_ref:
@@ -27,6 +21,12 @@ on:
         required: false
         default: ''
         type: string
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * *'
   workflow_call:
     inputs:
       scan_ref:
