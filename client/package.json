@@ -22,7 +22,7 @@
     "framer-motion": "^10.16.16",
     "react-hook-form": "^7.48.2",
     "react-select": "^5.8.0",
-    "date-fns": "^2.30.0",
+    "date-fns": "^4.1.0",
     "clsx": "^2.0.0",
     "@heroicons/react": "^2.0.18",
     "chart.js": "^4.4.0",
