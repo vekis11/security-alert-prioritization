@@ -10,7 +10,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "react-router-dom": "^6.20.1",
-    "axios": "^1.6.2",
+    "axios": "^1.13.5",
     "socket.io-client": "^4.7.4",
     "recharts": "^2.8.0",
     "react-query": "^3.39.3",
